@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-
 }
 
 datasource db {
@@ -14,16 +7,165 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//
+// ENUMS
+//
 enum Role {
-  CONSUMER
+  USER
   ADMIN
 }
 
-model User{
-  id          Int       @id @default(autoincrement())
-  Username    String    
-  email       String    @unique
-  password    String      
-  role        Role     @default(CONSUMER)
-  createdAt   DateTime  @default(now())     
+enum SubscriptionStatus {
+  ACTIVE
+  QUEUED
+  PAUSED
+  CANCELLED
+  PAST_DUE
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING
+  FAILED
+}
+
+enum NotificationType {
+  EXPIRY_WARNING
+  EXPIRED
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+//
+// USERS
+//
+model User {
+  id           Int      @id @default(autoincrement())
+  Username     String?       // Made optional
+  email        String   @unique
+  phone        String?
+  status       String   // active / inactive
+  role         Role     @default(USER)
+  passwordHash String?  // used if handling auth locally (not needed if only Supabase Auth)
+  createdAt    DateTime @default(now())
+
+  subscriptions Subscription[]
+  auditLogs     AuditLog[]
+  notifications Notification[]
+}
+
+//
+// SUBSCRIPTION PLANS
+//
+model Plan {
+  id        Int      @id @default(autoincrement())
+  name      String
+  price     Float
+  quotaGb   Int
+  autoRenew Boolean  @default(false)
+  status    String   // Active / Inactive
+  createdAt DateTime @default(now())
+
+  subscriptions Subscription[]
+  discounts     Discount[]
+}
+
+//
+// USER SUBSCRIPTIONS
+//
+model Subscription {
+  id              Int                 @id @default(autoincrement())
+  type            String              // monthly, yearly
+  planId          Int
+  userId          Int
+  status          SubscriptionStatus
+  startDate       DateTime
+  lastBilledDate  DateTime?
+  lastRenewedDate DateTime?
+  terminatedDate  DateTime?
+  graceTime       Int?                // days after expiry
+  usageGb         Float?              // track usage (for recommendation engine)
+
+  plan   Plan @relation(fields: [planId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
+  logs   SubscriptionLog[]
+  bills  Billing[]
+  notifications Notification[]
+}
+
+//
+// AUDIT LOGS
+//
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  actorId    Int
+  action     String
+  objectType String
+  objectId   Int
+  details    String?
+  timestamp  DateTime @default(now())
+
+  actor User @relation(fields: [actorId], references: [id])
+}
+
+//
+// SUBSCRIPTION LOGS
+//
+model SubscriptionLog {
+  id             Int      @id @default(autoincrement())
+  subscriptionId Int
+  currentStatus  String
+  nextStatus     String
+  action         String
+  actionDate     DateTime
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+//
+// BILLING INFORMATION
+//
+model Billing {
+  id             Int      @id @default(autoincrement())
+  subscriptionId Int
+  amount         Float
+  billingDate    DateTime
+  paymentStatus  PaymentStatus
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+//
+// DISCOUNTS
+//
+model Discount {
+  id        Int      @id @default(autoincrement())
+  planId    Int
+  name      String
+  percent   Float
+  validFrom DateTime
+  validTo   DateTime
+  conditions String?
+
+  plan Plan @relation(fields: [planId], references: [id])
+}
+
+//
+// NOTIFICATIONS
+//
+model Notification {
+  id             Int              @id @default(autoincrement())
+  userId         Int
+  subscriptionId Int
+  type           NotificationType
+  message        String
+  sentAt         DateTime?
+  status         NotificationStatus @default(PENDING)
+
+  user User @relation(fields: [userId], references: [id])
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
 }
