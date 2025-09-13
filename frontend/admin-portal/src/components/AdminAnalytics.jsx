@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
-
-// Import all components from the components folder
+// Import all components
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
@@ -13,7 +12,8 @@ import PlanAnalytics from './components/PlanAnalytics';
 import AIOptimization from './components/AIOptimization';
 import UserManagement from './components/UserManagement';
 import Settings from './components/Settings';
-import AdminAnalytics from './components/AdminAnalytics';
+// Use named import if AdminAnalytics is not default exported
+import { AdminAnalytics } from './components/AdminAnalytics';
 
 function App() {
   const [activeView, setActiveView] = useState('dashboard');
