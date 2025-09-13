@@ -36,49 +36,30 @@ api.interceptors.response.use(
   }
 );
 
-// Plan Management APIs
+// Plan Management APIs - Matching your existing endpoints
 export const planAPI = {
-  // Get all plans
-  getPlans: () => api.get('/plans'),
+  // GET /api/admin/plans - Get all plans with subscription statistics
+  getPlans: () => api.get('/admin/plans'),
   
-  // Get single plan
-  getPlan: (id) => api.get(`/plans/${id}`),
+  // POST /api/admin/plans - Create a new plan
+  createPlan: (planData) => api.post('/admin/plans', planData),
   
-  // Create new plan
-  createPlan: (planData) => api.post('/plans', planData),
+  // PUT /api/admin/plans/:planId - Update plan features and pricing
+  updatePlan: (planId, planData) => api.put(`/admin/plans/${planId}`, planData),
   
-  // Update existing plan
-  updatePlan: (id, planData) => api.put(`/plans/${id}`, planData),
-  
-  // Delete plan
-  deletePlan: (id) => api.delete(`/plans/${id}`),
-  
-  // Toggle plan status
-  togglePlanStatus: (id, status) => api.patch(`/plans/${id}/status`, { active: status })
+  // DELETE /api/admin/plans/:planId - Soft delete a plan
+  deletePlan: (planId) => api.delete(`/admin/plans/${planId}`)
 };
 
-// Discount Management APIs
-export const discountAPI = {
-  getDiscounts: () => api.get('/discounts'),
-  createDiscount: (discountData) => api.post('/discounts', discountData),
-  updateDiscount: (id, discountData) => api.put(`/discounts/${id}`, discountData),
-  deleteDiscount: (id) => api.delete(`/discounts/${id}`),
-  toggleDiscountStatus: (id, status) => api.patch(`/discounts/${id}/status`, { active: status })
-};
-
-// Analytics APIs
+// Analytics APIs - Matching your existing endpoints
 export const analyticsAPI = {
-  getPlanAnalytics: (timeRange) => api.get(`/analytics/plans?timeRange=${timeRange}`),
-  getSubscriptionTrends: (period) => api.get(`/analytics/trends?period=${period}`),
-  getEngagementMetrics: () => api.get('/analytics/engagement'),
-  exportAnalytics: (format) => api.get(`/analytics/export?format=${format}`, { responseType: 'blob' })
-};
-
-// AI Optimization APIs
-export const aiAPI = {
-  getOptimizationSuggestions: (type) => api.get(`/ai/suggestions?type=${type}`),
-  runAIAnalysis: () => api.post('/ai/analyze'),
-  implementSuggestion: (suggestionId, action) => api.post(`/ai/suggestions/${suggestionId}/implement`, { action })
+  // GET /api/admin/analytics/top-plans - Get most popular plans
+  getTopPlans: (period = 'current-month') => api.get(`/admin/analytics/top-plans?period=${period}`),
+  
+  // Additional analytics endpoints you might have
+  getPlanAnalytics: (timeRange) => api.get(`/admin/analytics/plans?timeRange=${timeRange}`),
+  getSubscriptionTrends: (period) => api.get(`/admin/analytics/trends?period=${period}`),
+  exportAnalytics: (format) => api.get(`/admin/analytics/export?format=${format}`, { responseType: 'blob' })
 };
 
 export default api;
