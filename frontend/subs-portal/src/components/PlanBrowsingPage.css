@@ -1,0 +1,161 @@
+/* PlanBrowsingPage.css */
+
+/* General page styles */
+.plan-page {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 20px;
+  background: #f5f7fa;
+  color: #333;
+}
+
+/* Header */
+.plan-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.plan-header h1 {
+  font-size: 2rem;
+  color: #4f46e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.plan-header p {
+  color: #555;
+  font-size: 1rem;
+}
+
+/* Banner */
+.plan-banner {
+  background: linear-gradient(90deg, #ff7eb3, #ff758c);
+  color: white;
+  text-align: center;
+  padding: 15px;
+  border-radius: 15px;
+  margin-bottom: 30px;
+  transition: transform 0.3s ease;
+}
+
+.plan-banner:hover {
+  transform: scale(1.02);
+}
+
+/* Plan Grid */
+.plan-grid,
+.suggested-carousel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Plan Card */
+.plan-card {
+  background: white;
+  border-radius: 15px;
+  padding: 15px;
+  width: 250px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.plan-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+/* Suggested plans special styling */
+.plan-card.suggested {
+  border: 2px solid #4f46e5;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Plan titles and offers */
+.plan-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+}
+
+.plan-card h3 span {
+  background: #4f46e5;
+  color: white;
+  font-size: 0.8rem;
+  padding: 2px 5px;
+  border-radius: 5px;
+  margin-left: 5px;
+}
+
+/* Plan description */
+.plan-card p {
+  font-size: 0.9rem;
+  margin: 3px 0;
+}
+
+/* Plan Buttons */
+.plan-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  gap: 5px;
+}
+
+.plan-buttons button {
+  flex: 1;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.plan-buttons button:hover {
+  transform: scale(1.05);
+}
+
+/* Subscribe button glow animation */
+.subscribe-btn {
+  background: #4f46e5;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(79, 70, 229, 0.5);
+}
+
+.subscribe-btn:hover {
+  animation: glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 5px rgba(79, 70, 229, 0.5); }
+  100% { box-shadow: 0 0 20px rgba(79, 70, 229, 1); }
+}
+
+/* Suggested Plans Carousel */
+.suggested-carousel {
+  overflow-x: auto;
+  padding: 10px 0;
+  gap: 15px;
+  scroll-behavior: smooth;
+}
+
+.suggested-carousel::-webkit-scrollbar {
+  height: 8px;
+}
+
+.suggested-carousel::-webkit-scrollbar-thumb {
+  background-color: #4f46e5;
+  border-radius: 4px;
+}
+
+.suggested-carousel::-webkit-scrollbar-track {
+  background: #e5e7eb;
+}
