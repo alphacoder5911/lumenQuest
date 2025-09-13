@@ -1,39 +1,16 @@
 import React, { useState } from 'react';
+import { usePlans } from '../hooks/usePlans';
 import './ManagePlan.css';
 
 const ManagePlan = () => {
-  const [plans, setPlans] = useState([
-    { 
-      id: 1, 
-      name: 'Basic Plan', 
-      price: 9.99, 
-      billing: 'monthly',
-      features: ['5 Users', '10GB Storage', 'Email Support', 'Basic Analytics'],
-      active: true,
-      subscribers: 234,
-      createdDate: '2025-01-15'
-    },
-    { 
-      id: 2, 
-      name: 'Pro Plan', 
-      price: 19.99, 
-      billing: 'monthly',
-      features: ['20 Users', '100GB Storage', 'Priority Support', 'Advanced Analytics', 'API Access'],
-      active: true,
-      subscribers: 456,
-      createdDate: '2025-01-10'
-    },
-    { 
-      id: 3, 
-      name: 'Enterprise', 
-      price: 49.99, 
-      billing: 'monthly',
-      features: ['Unlimited Users', '1TB Storage', '24/7 Support', 'Custom Features', 'White Label'],
-      active: false,
-      subscribers: 123,
-      createdDate: '2025-01-05'
-    }
-  ]);
+  const {
+    plans,
+    loading,
+    error,
+    createPlan,
+    updatePlan,
+    deletePlan
+  } = usePlans();
 
   const [showAddPlan, setShowAddPlan] = useState(false);
   const [showEditPlan, setShowEditPlan] = useState(false);
@@ -42,97 +19,128 @@ const ManagePlan = () => {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
+    quotaGb: '',
     billing: 'monthly',
     features: '',
     active: true
   });
+  const [submitting, setSubmitting] = useState(false);
 
-  // Add new plan
-  const handleAddPlan = () => {
+  const handleAddPlan = async () => {
     if (formData.name && formData.price) {
-      const newPlan = {
-        id: Date.now(),
+      setSubmitting(true);
+      
+      // Format data according to your API expectations
+      const planData = {
         name: formData.name,
         price: parseFloat(formData.price),
+        quotaGb: parseInt(formData.quotaGb) || 10,
         billing: formData.billing,
-        features: formData.features.split(',').map(f => f.trim()),
-        active: formData.active,
-        subscribers: 0,
-        createdDate: new Date().toISOString().split('T')
+        features: formData.features.split(',').map(f => f.trim()).filter(f => f),
+        // Add any other fields your API expects
       };
-      setPlans([...plans, newPlan]);
-      resetForm();
-      setShowAddPlan(false);
+
+      const result = await createPlan(planData);
+      
+      if (result.success) {
+        resetForm();
+        setShowAddPlan(false);
+        alert('Plan created successfully!');
+      } else {
+        alert(`Error: ${result.error}`);
+      }
+      setSubmitting(false);
     }
   };
 
-  // Modify/Edit existing plan
+  const handleUpdatePlan = async () => {
+    if (formData.name && formData.price && selectedPlan) {
+      setSubmitting(true);
+      
+      const planData = {
+        name: formData.name,
+        price: parseFloat(formData.price),
+        quotaGb: parseInt(formData.quotaGb) || 10,
+        billing: formData.billing,
+        features: formData.features.split(',').map(f => f.trim()).filter(f => f),
+      };
+
+      // Use the correct ID field (could be 'id' or '_id')
+      const planId = selectedPlan.id || selectedPlan._id;
+      const result = await updatePlan(planId, planData);
+      
+      if (result.success) {
+        resetForm();
+        setShowEditPlan(false);
+        setSelectedPlan(null);
+        alert('Plan updated successfully!');
+      } else {
+        alert(`Error: ${result.error}`);
+      }
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeletePlan = async () => {
+    if (selectedPlan) {
+      setSubmitting(true);
+      
+      const planId = selectedPlan.id || selectedPlan._id;
+      const result = await deletePlan(planId);
+      
+      if (result.success) {
+        setShowDeleteConfirm(false);
+        setSelectedPlan(null);
+        alert('Plan deleted successfully!');
+      } else {
+        alert(`Error: ${result.error}`);
+      }
+      setSubmitting(false);
+    }
+  };
+
   const handleEditPlan = (plan) => {
     setSelectedPlan(plan);
     setFormData({
-      name: plan.name,
-      price: plan.price.toString(),
-      billing: plan.billing,
-      features: plan.features.join(', '),
-      active: plan.active
+      name: plan.name || '',
+      price: plan.price?.toString() || '',
+      quotaGb: plan.quotaGb?.toString() || '',
+      billing: plan.billing || 'monthly',
+      features: Array.isArray(plan.features) ? plan.features.join(', ') : '',
+      active: plan.active !== undefined ? plan.active : true
     });
     setShowEditPlan(true);
-  };
-
-  const handleUpdatePlan = () => {
-    if (formData.name && formData.price && selectedPlan) {
-      const updatedPlans = plans.map(plan => 
-        plan.id === selectedPlan.id 
-          ? {
-              ...plan,
-              name: formData.name,
-              price: parseFloat(formData.price),
-              billing: formData.billing,
-              features: formData.features.split(',').map(f => f.trim()),
-              active: formData.active
-            }
-          : plan
-      );
-      setPlans(updatedPlans);
-      resetForm();
-      setShowEditPlan(false);
-      setSelectedPlan(null);
-    }
-  };
-
-  // Delete existing plan
-  const handleDeletePlan = (plan) => {
-    setSelectedPlan(plan);
-    setShowDeleteConfirm(true);
-  };
-
-  const confirmDeletePlan = () => {
-    if (selectedPlan) {
-      setPlans(plans.filter(plan => plan.id !== selectedPlan.id));
-      setShowDeleteConfirm(false);
-      setSelectedPlan(null);
-    }
-  };
-
-  const togglePlanStatus = (id) => {
-    setPlans(plans.map(plan => 
-      plan.id === id ? { ...plan, active: !plan.active } : plan
-    ));
   };
 
   const resetForm = () => {
     setFormData({
       name: '',
       price: '',
+      quotaGb: '',
       billing: 'monthly',
       features: '',
       active: true
     });
   };
 
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading plans...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <h3>Error Loading Plans</h3>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    );
+  }
 
   return (
     <div className="manage-plan">
@@ -160,18 +168,18 @@ const ManagePlan = () => {
         </div>
         <div className="stat-card">
           <h3>Active Plans</h3>
-          <div className="stat-number">{plans.filter(p => p.active).length}</div>
+          <div className="stat-number">{plans.filter(p => p.active !== false).length}</div>
           <div className="stat-label">Currently Active</div>
         </div>
         <div className="stat-card">
           <h3>Total Subscribers</h3>
-          <div className="stat-number">{plans.reduce((sum, p) => sum + p.subscribers, 0)}</div>
+          <div className="stat-number">{plans.reduce((sum, p) => sum + (p.subscriberCount || 0), 0)}</div>
           <div className="stat-label">Across All Plans</div>
         </div>
         <div className="stat-card">
           <h3>Monthly Revenue</h3>
           <div className="stat-number">
-            ${plans.reduce((sum, p) => sum + (p.price * p.subscribers), 0).toLocaleString()}
+            ${plans.reduce((sum, p) => sum + ((p.price || 0) * (p.subscriberCount || 0)), 0).toLocaleString()}
           </div>
           <div className="stat-label">Estimated</div>
         </div>
@@ -179,73 +187,77 @@ const ManagePlan = () => {
 
       {/* Plans Grid */}
       <div className="plans-grid">
-        {plans.map(plan => (
-          <div key={plan.id} className={`plan-card ${!plan.active ? 'inactive' : ''}`}>
-            <div className="plan-header">
-              <div className="plan-title">
-                <h3>{plan.name}</h3>
-                <span className={`status-badge ${plan.active ? 'active' : 'inactive'}`}>
-                  {plan.active ? 'Active' : 'Inactive'}
+        {plans.map(plan => {
+          const planId = plan.id || plan._id;
+          return (
+            <div key={planId} className={`plan-card ${plan.active === false ? 'inactive' : ''}`}>
+              <div className="plan-header">
+                <div className="plan-title">
+                  <h3>{plan.name}</h3>
+                  <span className={`status-badge ${plan.active !== false ? 'active' : 'inactive'}`}>
+                    {plan.active !== false ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+                <div className="plan-price">
+                  <span className="price">${plan.price}</span>
+                  <span className="billing">/{plan.billing || 'month'}</span>
+                </div>
+              </div>
+              
+              <div className="plan-metrics">
+                <div className="metric">
+                  <span className="metric-value">{plan.subscriberCount || 0}</span>
+                  <span className="metric-label">Subscribers</span>
+                </div>
+                <div className="metric">
+                  <span className="metric-value">{plan.quotaGb || 0}GB</span>
+                  <span className="metric-label">Storage</span>
+                </div>
+                <div className="metric">
+                  <span className="metric-value">${((plan.price || 0) * (plan.subscriberCount || 0)).toLocaleString()}</span>
+                  <span className="metric-label">Revenue</span>
+                </div>
+              </div>
+
+              <div className="plan-features">
+                <h4>Features</h4>
+                {(plan.features || []).map((feature, index) => (
+                  <div key={index} className="feature-item">
+                    <span className="feature-icon">✓</span>
+                    {feature}
+                  </div>
+                ))}
+              </div>
+
+              <div className="plan-meta">
+                <span className="created-date">
+                  Created: {plan.createdAt ? new Date(plan.createdAt).toLocaleDateString() : 'Unknown'}
                 </span>
               </div>
-              <div className="plan-price">
-                <span className="price">${plan.price}</span>
-                <span className="billing">/{plan.billing}</span>
-              </div>
-            </div>
-            
-            <div className="plan-metrics">
-              <div className="metric">
-                <span className="metric-value">{plan.subscribers}</span>
-                <span className="metric-label">Subscribers</span>
-              </div>
-              <div className="metric">
-                <span className="metric-value">${(plan.price * plan.subscribers).toLocaleString()}</span>
-                <span className="metric-label">Revenue</span>
-              </div>
-            </div>
-
-            <div className="plan-features">
-              <h4>Features</h4>
-              {plan.features.map((feature, index) => (
-                <div key={index} className="feature-item">
-                  <span className="feature-icon">✓</span>
-                  {feature}
-                </div>
-              ))}
-            </div>
-
-            <div className="plan-meta">
-              <span className="created-date">Created: {new Date(plan.createdDate).toLocaleDateString()}</span>
-            </div>
-            
-            <div className="plan-actions">
-              <button 
-                className={`status-btn ${plan.active ? 'active' : 'inactive'}`}
-                onClick={() => togglePlanStatus(plan.id)}
-                title={plan.active ? 'Deactivate Plan' : 'Activate Plan'}
-              >
-                {plan.active ? '⏸️ Deactivate' : '▶️ Activate'}
-              </button>
               
-              <button 
-                className="edit-btn"
-                onClick={() => handleEditPlan(plan)}
-                title="Modify Existing Plan"
-              >
-                ✏️ Modify Plan
-              </button>
-              
-              <button 
-                className="delete-btn"
-                onClick={() => handleDeletePlan(plan)}
-                title="Delete Existing Plan"
-              >
-                🗑️ Delete Plan
-              </button>
+              <div className="plan-actions">
+                <button 
+                  className="edit-btn"
+                  onClick={() => handleEditPlan(plan)}
+                  disabled={submitting}
+                >
+                  ✏️ Modify Plan
+                </button>
+                
+                <button 
+                  className="delete-btn"
+                  onClick={() => {
+                    setSelectedPlan(plan);
+                    setShowDeleteConfirm(true);
+                  }}
+                  disabled={submitting}
+                >
+                  🗑️ Delete Plan
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Add Plan Modal */}
@@ -267,19 +279,30 @@ const ManagePlan = () => {
                     type="text"
                     placeholder="e.g., Premium Plan"
                     value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
                     required
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Price</label>
+                  <label>Price ($)</label>
                   <input
                     type="number"
                     step="0.01"
                     placeholder="9.99"
                     value={formData.price}
-                    onChange={(e) => handleInputChange('price', e.target.value)}
+                    onChange={(e) => setFormData({...formData, price: e.target.value})}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Storage Quota (GB)</label>
+                  <input
+                    type="number"
+                    placeholder="10"
+                    value={formData.quotaGb}
+                    onChange={(e) => setFormData({...formData, quotaGb: e.target.value})}
                     required
                   />
                 </div>
@@ -288,24 +311,12 @@ const ManagePlan = () => {
                   <label>Billing Cycle</label>
                   <select
                     value={formData.billing}
-                    onChange={(e) => handleInputChange('billing', e.target.value)}
+                    onChange={(e) => setFormData({...formData, billing: e.target.value})}
                   >
                     <option value="monthly">Monthly</option>
                     <option value="yearly">Yearly</option>
                     <option value="weekly">Weekly</option>
                   </select>
-                </div>
-
-                <div className="form-group checkbox-group">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={formData.active}
-                      onChange={(e) => handleInputChange('active', e.target.checked)}
-                    />
-                    <span className="checkmark"></span>
-                    Active Plan
-                  </label>
                 </div>
               </div>
 
@@ -314,17 +325,20 @@ const ManagePlan = () => {
                 <textarea
                   placeholder="e.g., 10 Users, 50GB Storage, Email Support"
                   value={formData.features}
-                  onChange={(e) => handleInputChange('features', e.target.value)}
+                  onChange={(e) => setFormData({...formData, features: e.target.value})}
                   rows="3"
                 />
               </div>
 
               <div className="modal-actions">
-                <button type="submit" className="save-btn">Create Plan</button>
+                <button type="submit" className="save-btn" disabled={submitting}>
+                  {submitting ? 'Creating...' : 'Create Plan'}
+                </button>
                 <button 
                   type="button" 
                   className="cancel-btn" 
                   onClick={() => { resetForm(); setShowAddPlan(false); }}
+                  disabled={submitting}
                 >
                   Cancel
                 </button>
@@ -352,18 +366,28 @@ const ManagePlan = () => {
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
                     required
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Price</label>
+                  <label>Price ($)</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.price}
-                    onChange={(e) => handleInputChange('price', e.target.value)}
+                    onChange={(e) => setFormData({...formData, price: e.target.value})}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Storage Quota (GB)</label>
+                  <input
+                    type="number"
+                    value={formData.quotaGb}
+                    onChange={(e) => setFormData({...formData, quotaGb: e.target.value})}
                     required
                   />
                 </div>
@@ -372,24 +396,12 @@ const ManagePlan = () => {
                   <label>Billing Cycle</label>
                   <select
                     value={formData.billing}
-                    onChange={(e) => handleInputChange('billing', e.target.value)}
+                    onChange={(e) => setFormData({...formData, billing: e.target.value})}
                   >
                     <option value="monthly">Monthly</option>
                     <option value="yearly">Yearly</option>
                     <option value="weekly">Weekly</option>
                   </select>
-                </div>
-
-                <div className="form-group checkbox-group">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={formData.active}
-                      onChange={(e) => handleInputChange('active', e.target.checked)}
-                    />
-                    <span className="checkmark"></span>
-                    Active Plan
-                  </label>
                 </div>
               </div>
 
@@ -397,17 +409,20 @@ const ManagePlan = () => {
                 <label>Features (comma-separated)</label>
                 <textarea
                   value={formData.features}
-                  onChange={(e) => handleInputChange('features', e.target.value)}
+                  onChange={(e) => setFormData({...formData, features: e.target.value})}
                   rows="3"
                 />
               </div>
 
               <div className="modal-actions">
-                <button type="submit" className="save-btn">Update Plan</button>
+                <button type="submit" className="save-btn" disabled={submitting}>
+                  {submitting ? 'Updating...' : 'Update Plan'}
+                </button>
                 <button 
                   type="button" 
                   className="cancel-btn" 
                   onClick={() => { resetForm(); setShowEditPlan(false); setSelectedPlan(null); }}
+                  disabled={submitting}
                 >
                   Cancel
                 </button>
@@ -438,20 +453,21 @@ const ManagePlan = () => {
               <div className="deletion-impact">
                 <p><strong>Impact:</strong></p>
                 <ul>
-                  <li>{selectedPlan?.subscribers} subscribers will be affected</li>
-                  <li>Monthly revenue of ${selectedPlan ? (selectedPlan.price * selectedPlan.subscribers).toLocaleString() : 0} will be lost</li>
+                  <li>{selectedPlan?.subscriberCount || 0} subscribers will be affected</li>
+                  <li>Monthly revenue of ${selectedPlan ? ((selectedPlan.price || 0) * (selectedPlan.subscriberCount || 0)).toLocaleString() : 0} will be lost</li>
                   <li>All plan data will be permanently removed</li>
                 </ul>
               </div>
             </div>
 
             <div className="modal-actions">
-              <button className="delete-confirm-btn" onClick={confirmDeletePlan}>
-                Yes, Delete Plan
+              <button className="delete-confirm-btn" onClick={handleDeletePlan} disabled={submitting}>
+                {submitting ? 'Deleting...' : 'Yes, Delete Plan'}
               </button>
               <button 
                 className="cancel-btn" 
                 onClick={() => { setShowDeleteConfirm(false); setSelectedPlan(null); }}
+                disabled={submitting}
               >
                 Cancel
               </button>
