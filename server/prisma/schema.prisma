@@ -1,12 +1,12 @@
 generator client {
   provider = "prisma-client-js"
 }
- 
+
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL") // Supabase connection
 }
- 
+
 //
 // ENUMS
 //
@@ -14,7 +14,7 @@ enum Role {
   USER
   ADMIN
 }
- 
+
 enum SubscriptionStatus {
   ACTIVE
   QUEUED
@@ -22,42 +22,42 @@ enum SubscriptionStatus {
   CANCELLED
   PAST_DUE
 }
- 
+
 enum PaymentStatus {
   PAID
   PENDING
   FAILED
 }
- 
+
 enum NotificationType {
   EXPIRY_WARNING
   EXPIRED
 }
- 
+
 enum NotificationStatus {
   PENDING
   SENT
   FAILED
 }
- 
+
 //
 // USERS
 //
 model User {
   id           Int      @id @default(autoincrement())
-  Username     String?       // Made optional
+  name         String
   email        String   @unique
   phone        String?
   status       String   // active / inactive
   role         Role     @default(USER)
   passwordHash String?  // used if handling auth locally (not needed if only Supabase Auth)
   createdAt    DateTime @default(now())
- 
+
   subscriptions Subscription[]
   auditLogs     AuditLog[]
   notifications Notification[]
 }
- 
+
 //
 // SUBSCRIPTION PLANS
 //
@@ -69,11 +69,11 @@ model Plan {
   autoRenew Boolean  @default(false)
   status    String   // Active / Inactive
   createdAt DateTime @default(now())
- 
+
   subscriptions Subscription[]
   discounts     Discount[]
 }
- 
+
 //
 // USER SUBSCRIPTIONS
 //
@@ -89,43 +89,43 @@ model Subscription {
   terminatedDate  DateTime?
   graceTime       Int?                // days after expiry
   usageGb         Float?              // track usage (for recommendation engine)
- 
+
   plan   Plan @relation(fields: [planId], references: [id])
   user   User @relation(fields: [userId], references: [id])
   logs   SubscriptionLog[]
   bills  Billing[]
   notifications Notification[]
 }
- 
+
 //
-// AUDIT LOGS
+// AUDIT LOGS (for security + compliance)
 //
 model AuditLog {
   id         Int      @id @default(autoincrement())
   actorId    Int
-  action     String
-  objectType String
+  action     String   // SUBSCRIBE | UPGRADE | DOWNGRADE | CANCEL | PLAN_CREATE etc.
+  objectType String   // subscription | plan | discount | billing
   objectId   Int
-  details    String?
+  details    String?  // optional JSON/text
   timestamp  DateTime @default(now())
- 
+
   actor User @relation(fields: [actorId], references: [id])
 }
- 
+
 //
-// SUBSCRIPTION LOGS
+// SUBSCRIPTION LOGS (lifecycle history)
 //
 model SubscriptionLog {
   id             Int      @id @default(autoincrement())
   subscriptionId Int
   currentStatus  String
   nextStatus     String
-  action         String
+  action         String   // subscribe, renew, upgrade, downgrade, cancel
   actionDate     DateTime
- 
+
   subscription Subscription @relation(fields: [subscriptionId], references: [id])
 }
- 
+
 //
 // BILLING INFORMATION
 //
@@ -135,27 +135,27 @@ model Billing {
   amount         Float
   billingDate    DateTime
   paymentStatus  PaymentStatus
- 
+
   subscription Subscription @relation(fields: [subscriptionId], references: [id])
 }
- 
+
 //
-// DISCOUNTS
+// DISCOUNTS (optional feature for admins)
 //
 model Discount {
   id        Int      @id @default(autoincrement())
   planId    Int
   name      String
-  percent   Float
+  percent   Float    // e.g. 10% off
   validFrom DateTime
   validTo   DateTime
-  conditions String?
- 
+  conditions String? // optional JSON rules (e.g. "new users only")
+
   plan Plan @relation(fields: [planId], references: [id])
 }
- 
+
 //
-// NOTIFICATIONS
+// NOTIFICATIONS (expiry + reminders)
 //
 model Notification {
   id             Int              @id @default(autoincrement())
@@ -163,9 +163,9 @@ model Notification {
   subscriptionId Int
   type           NotificationType
   message        String
-  sentAt         DateTime?
+  sentAt         DateTime?        // null until sent
   status         NotificationStatus @default(PENDING)
- 
+
   user User @relation(fields: [userId], references: [id])
   subscription Subscription @relation(fields: [subscriptionId], references: [id])
 }

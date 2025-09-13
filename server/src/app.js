@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 
 // Import routes
 import authRoutes from "./routes/auth.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
 // Import middleware
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -42,6 +43,7 @@ app.get("/health", (req, res) => {
 
 // API Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Error handling middleware (must be last)
 app.use(notFound);

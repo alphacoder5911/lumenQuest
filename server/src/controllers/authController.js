@@ -31,7 +31,7 @@ export const register = async (req, res) => {
 
     const user = await prisma.user.create({
       data: {
-        Username: name,
+        name,
         email,
         phone,
         passwordHash,
@@ -40,7 +40,7 @@ export const register = async (req, res) => {
       },
       select: {
         id: true,
-        Username: true,
+        name: true,
         email: true,
         phone: true,
         role: true,
@@ -63,10 +63,7 @@ export const register = async (req, res) => {
       success: true,
       message: "User registered successfully",
       data: {
-        user: {
-          ...user,
-          name: user.Username
-        },
+        user,
         token
       }
     });
@@ -130,7 +127,7 @@ export const login = async (req, res) => {
 
     const userData = {
       id: user.id,
-      name: user.Username,
+      name: user.name,
       email: user.email,
       phone: user.phone,
       role: user.role,
@@ -176,7 +173,7 @@ export const verifyToken = async (req, res) => {
       where: { id: req.user.userId },
       select: {
         id: true,
-        Username: true,
+        name: true,
         email: true,
         phone: true,
         role: true,
@@ -194,12 +191,7 @@ export const verifyToken = async (req, res) => {
     res.json({
       success: true,
       message: "Token is valid",
-      data: {
-        user: {
-          ...user,
-          name: user.Username
-        }
-      }
+      data: { user }
     });
 
   } catch (error) {
