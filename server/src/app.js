@@ -5,6 +5,9 @@ import dotenv from "dotenv";
 // Import routes
 import authRoutes from "./routes/auth.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import planRoutes from "../Routes/plans.js";
+import subscriptionRoutes from "../Routes/subscriptions.js";
+import billingRoutes from "../Routes/billing.js";
 
 // Import middleware
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -44,6 +47,9 @@ app.get("/health", (req, res) => {
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/plans", planRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/billing", billingRoutes);
 
 // Error handling middleware (must be last)
 app.use(notFound);
