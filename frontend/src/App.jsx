@@ -1,34 +1,35 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+// Pages
+import HomePage from './pages/HomePage'
+import UserDashboard from './pages/user/UserDashboard'
+import UserSubscriptions from './pages/user/UserSubscriptions'
+import BrowsePlans from './pages/user/BrowsePlans'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminPlans from './pages/admin/AdminPlans'
+import AdminAnalytics from './pages/admin/AdminAnalytics'
 
+function App() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Router>
+      <div className="min-h-screen bg-gray-50">
+        <Routes>
+          {/* home Route */}
+          <Route path="/" element={<HomePage />} />
+
+          {/* user Routes */}
+          <Route path="/user/dashboard" element={<UserDashboard />} />
+          <Route path="/user/subscriptions" element={<UserSubscriptions />} />
+          <Route path="/user/plans" element={<BrowsePlans />} />
+
+          {/* admin Routes */}
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/plans" element={<AdminPlans />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
+        </Routes>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </Router>
   )
 }
 
