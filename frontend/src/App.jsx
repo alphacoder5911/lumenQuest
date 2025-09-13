@@ -8,15 +8,15 @@ import ProtectedRoute from './components/auth/ProtectedRoute'
 import AuthLayout from './components/auth/AuthLayout'
 
 // Pages
-import HomePage from './pages/HomePage'
+// import HomePage from './pages/HomePage'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import UserDashboard from './pages/user/UserDashboard'
-import UserSubscriptions from './pages/user/UserSubscriptions'
-import BrowsePlans from './pages/user/BrowsePlans'
+// import UserSubscriptions from './pages/user/UserSubscriptions'
+// import BrowsePlans from './pages/user/BrowsePlans'
 import AdminDashboard from './pages/admin/AdminDashboard'
-import AdminPlans from './pages/admin/AdminPlans'
-import AdminAnalytics from './pages/admin/AdminAnalytics'
+// import AdminPlans from './pages/admin/AdminPlans'
+// import AdminAnalytics from './pages/admin/AdminAnalytics'
 
 function App() {
   return (
@@ -25,7 +25,7 @@ function App() {
         <div className="min-h-screen bg-gray-50">
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<HomePage />} />
+            {/* <Route path="/" element={<HomePage />} /> */}
 
             {/* Auth Routes */}
             <Route element={<AuthLayout />}>
@@ -42,22 +42,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
+            {/* <Route
               path="/user/subscriptions"
               element={
                 <ProtectedRoute allowedRoles={['USER', 'ADMIN']}>
                   <UserSubscriptions />
                 </ProtectedRoute>
               }
-            />
-            <Route
+            /> */}
+            {/* <Route
               path="/user/plans"
               element={
                 <ProtectedRoute allowedRoles={['USER', 'ADMIN']}>
                   <BrowsePlans />
                 </ProtectedRoute>
               }
-            />
+            /> */}
 
             {/* Protected Admin Routes */}
             <Route
@@ -68,22 +68,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
+            {/* <Route
               path="/admin/plans"
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
                   <AdminPlans />
                 </ProtectedRoute>
               }
-            />
-            <Route
+            /> */}
+            {/* <Route
               path="/admin/analytics"
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
                   <AdminAnalytics />
                 </ProtectedRoute>
               }
-            />
+            /> */}
           </Routes>
         </div>
       </Router>

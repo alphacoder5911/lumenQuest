@@ -1,10 +1,10 @@
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL") // Supabase connection
-}
- 
 generator client {
   provider = "prisma-client-js"
+}
+ 
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
  
 //
@@ -45,7 +45,7 @@ enum NotificationStatus {
 //
 model User {
   id           Int      @id @default(autoincrement())
-  name         String
+  Username     String?       // Made optional
   email        String   @unique
   phone        String?
   status       String   // active / inactive
@@ -98,29 +98,29 @@ model Subscription {
 }
  
 //
-// AUDIT LOGS (for security + compliance)
+// AUDIT LOGS
 //
 model AuditLog {
   id         Int      @id @default(autoincrement())
   actorId    Int
-  action     String   // SUBSCRIBE | UPGRADE | DOWNGRADE | CANCEL | PLAN_CREATE etc.
-  objectType String   // subscription | plan | discount | billing
+  action     String
+  objectType String
   objectId   Int
-  details    String?  // optional JSON/text
+  details    String?
   timestamp  DateTime @default(now())
  
   actor User @relation(fields: [actorId], references: [id])
 }
  
 //
-// SUBSCRIPTION LOGS (lifecycle history)
+// SUBSCRIPTION LOGS
 //
 model SubscriptionLog {
   id             Int      @id @default(autoincrement())
   subscriptionId Int
   currentStatus  String
   nextStatus     String
-  action         String   // subscribe, renew, upgrade, downgrade, cancel
+  action         String
   actionDate     DateTime
  
   subscription Subscription @relation(fields: [subscriptionId], references: [id])
@@ -140,22 +140,22 @@ model Billing {
 }
  
 //
-// DISCOUNTS (optional feature for admins)
+// DISCOUNTS
 //
 model Discount {
   id        Int      @id @default(autoincrement())
   planId    Int
   name      String
-  percent   Float    // e.g. 10% off
+  percent   Float
   validFrom DateTime
   validTo   DateTime
-  conditions String? // optional JSON rules (e.g. "new users only")
+  conditions String?
  
   plan Plan @relation(fields: [planId], references: [id])
 }
  
 //
-// NOTIFICATIONS (expiry + reminders)
+// NOTIFICATIONS
 //
 model Notification {
   id             Int              @id @default(autoincrement())
@@ -163,7 +163,7 @@ model Notification {
   subscriptionId Int
   type           NotificationType
   message        String
-  sentAt         DateTime?        // null until sent
+  sentAt         DateTime?
   status         NotificationStatus @default(PENDING)
  
   user User @relation(fields: [userId], references: [id])
