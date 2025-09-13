@@ -9,11 +9,19 @@ export const usePlans = () => {
   const fetchPlans = async () => {
     try {
       setLoading(true);
-      const response = await planAPI.getPlans();
-      setPlans(response.data);
       setError(null);
+      
+      // Call your existing API endpoint
+      const response = await planAPI.getPlans();
+      
+      // Handle the response based on your API structure
+      // Assuming your API returns: { success: true, data: [...plans] }
+      const plansData = response.data?.data || response.data;
+      setPlans(plansData);
+      
     } catch (err) {
-      setError(err.message);
+      console.error('Error fetching plans:', err);
+      setError(err.response?.data?.message || err.message || 'Failed to fetch plans');
     } finally {
       setLoading(false);
     }
@@ -21,45 +29,78 @@ export const usePlans = () => {
 
   const createPlan = async (planData) => {
     try {
-      const response = await planAPI.createPlan(planData);
-      setPlans(prev => [...prev, response.data]);
-      return { success: true, data: response.data };
+      // Format data according to your API expectations
+      const formattedData = {
+        name: planData.name,
+        price: parseFloat(planData.price),
+        quotaGb: planData.quotaGb || 10, // Add your required fields
+        features: planData.features || [],
+        billing: planData.billing || 'monthly',
+        // Add any other fields your API expects
+      };
+
+      const response = await planAPI.createPlan(formattedData);
+      
+      // Update local state with new plan
+      const newPlan = response.data?.data || response.data;
+      setPlans(prev => [...prev, newPlan]);
+      
+      return { success: true, data: newPlan };
     } catch (err) {
-      return { success: false, error: err.message };
+      console.error('Error creating plan:', err);
+      return { 
+        success: false, 
+        error: err.response?.data?.message || err.message || 'Failed to create plan'
+      };
     }
   };
 
-  const updatePlan = async (id, planData) => {
+  const updatePlan = async (planId, planData) => {
     try {
-      const response = await planAPI.updatePlan(id, planData);
+      // Format data according to your API expectations
+      const formattedData = {
+        name: planData.name,
+        price: parseFloat(planData.price),
+        quotaGb: planData.quotaGb,
+        features: planData.features || [],
+        billing: planData.billing || 'monthly',
+        // Add any other fields your API expects
+      };
+
+      const response = await planAPI.updatePlan(planId, formattedData);
+      
+      // Update local state
+      const updatedPlan = response.data?.data || response.data;
       setPlans(prev => prev.map(plan => 
-        plan.id === id ? response.data : plan
+        plan.id === planId || plan._id === planId ? updatedPlan : plan
       ));
-      return { success: true, data: response.data };
+      
+      return { success: true, data: updatedPlan };
     } catch (err) {
-      return { success: false, error: err.message };
+      console.error('Error updating plan:', err);
+      return { 
+        success: false, 
+        error: err.response?.data?.message || err.message || 'Failed to update plan'
+      };
     }
   };
 
-  const deletePlan = async (id) => {
+  const deletePlan = async (planId) => {
     try {
-      await planAPI.deletePlan(id);
-      setPlans(prev => prev.filter(plan => plan.id !== id));
+      await planAPI.deletePlan(planId);
+      
+      // Remove from local state (soft delete)
+      setPlans(prev => prev.filter(plan => 
+        (plan.id !== planId && plan._id !== planId)
+      ));
+      
       return { success: true };
     } catch (err) {
-      return { success: false, error: err.message };
-    }
-  };
-
-  const togglePlanStatus = async (id, status) => {
-    try {
-      await planAPI.togglePlanStatus(id, status);
-      setPlans(prev => prev.map(plan => 
-        plan.id === id ? { ...plan, active: status } : plan
-      ));
-      return { success: true };
-    } catch (err) {
-      return { success: false, error: err.message };
+      console.error('Error deleting plan:', err);
+      return { 
+        success: false, 
+        error: err.response?.data?.message || err.message || 'Failed to delete plan'
+      };
     }
   };
 
@@ -74,7 +115,6 @@ export const usePlans = () => {
     refetch: fetchPlans,
     createPlan,
     updatePlan,
-    deletePlan,
-    togglePlanStatus
+    deletePlan
   };
 };
