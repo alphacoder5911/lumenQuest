@@ -7,6 +7,8 @@ import SubsManager from './components/SubsManager';
 import ManagePlan from './components/ManagePlan';
 import ManageDiscount from './components/ManageDiscount';
 import ManageAnalytics from './components/ManageAnalytics';
+import PlanAnalytics from './components/PlanAnalytics';
+import AIOptimization from './components/AIOptimization';
 import UserManagement from './components/UserManagement';
 import Settings from './components/Settings';
 
@@ -21,6 +23,8 @@ function App() {
       case 'manage-plan': return <ManagePlan />;
       case 'manage-discount': return <ManageDiscount />;
       case 'manage-analytics': return <ManageAnalytics />;
+      case 'plan-analytics': return <PlanAnalytics />;
+      case 'ai-optimize': return <AIOptimization />;
       case 'users': return <UserManagement />;
       case 'settings': return <Settings />;
       default: return <Dashboard />;
