@@ -1,70 +1,44 @@
-import React, { useState } from 'react';
-import './App.css';
-// Import all components
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import Dashboard from './components/Dashboard';
-import SubsManager from './components/SubsManager';
-import ManagePlan from './components/ManagePlan';
-import ManageDiscount from './components/ManageDiscount';
-import ManageAnalytics from './components/ManageAnalytics';
-import PlanAnalytics from './components/PlanAnalytics';
-import AIOptimization from './components/AIOptimization';
-import UserManagement from './components/UserManagement';
-import Settings from './components/Settings';
-// Use named import if AdminAnalytics is not default exported
-import { AdminAnalytics } from './components/AdminAnalytics';
+import React from 'react';
 
-function App() {
-  const [activeView, setActiveView] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const renderActiveView = () => {
-    switch(activeView) {
-      case 'dashboard': 
-        return <Dashboard />;
-      case 'subs-manager': 
-        return <SubsManager />;
-      case 'manage-plan': 
-        return <ManagePlan />;
-      case 'manage-discount': 
-        return <ManageDiscount />;
-      case 'manage-analytics': 
-        return <ManageAnalytics />;
-      case 'plan-analytics': 
-        return <PlanAnalytics />;
-      case 'ai-optimize': 
-        return <AIOptimization />;
-      case 'users': 
-        return <UserManagement />;
-      case 'settings': 
-        return <Settings />;
-      case 'admin-analytics':
-        return <AdminAnalytics />;
-      default: 
-        return <Dashboard />;
-    }
-  };
+const AdminAnalytics = () => {
+  // Example data -- replace with your analytics data, logic or API calls
+  const stats = [
+    { label: 'Active Users', value: 127 },
+    { label: 'Total Subscriptions', value: 542 },
+    { label: 'Revenue (Monthly)', value: '$8,390' },
+    { label: 'Conversion Rate', value: '3.7%' }
+  ];
 
   return (
-    <div className="app">
-      <Sidebar 
-        activeView={activeView} 
-        setActiveView={setActiveView}
-        isOpen={sidebarOpen}
-        setIsOpen={setSidebarOpen}
-      />
-      <div className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
-        <Header 
-          setSidebarOpen={setSidebarOpen} 
-          sidebarOpen={sidebarOpen} 
-        />
-        <div className="content-area">
-          {renderActiveView()}
+    <div className="admin-analytics-container">
+      <h2>Admin Analytics Dashboard</h2>
+      <div className="stats-panel">
+        {stats.map((stat, idx) => (
+          <div key={idx} className="stat-item">
+            <h4>{stat.label}</h4>
+            <p>{stat.value}</p>
+          </div>
+        ))}
+      </div>
+      {/* Example chart placeholder */}
+      <div className="charts-section">
+        <h3>Usage Trends</h3>
+        <div className="chart-placeholder">
+          {/* Integrate chart libraries like Chart.js or Recharts for real charts */}
+          <p>[Chart goes here]</p>
         </div>
+      </div>
+      {/* Additional analytics widgets/components */}
+      <div className="additional-widgets">
+        <h3>Recent Activity</h3>
+        <ul>
+          <li>User X upgraded subscription</li>
+          <li>User Y cancelled</li>
+          <li>New discount added</li>
+        </ul>
       </div>
     </div>
   );
-}
+};
 
-export default App;
+export default AdminAnalytics;
