@@ -18,16 +18,26 @@ function App() {
 
   const renderActiveView = () => {
     switch(activeView) {
-      case 'dashboard': return <Dashboard />;
-      case 'subs-manager': return <SubsManager />;
-      case 'manage-plan': return <ManagePlan />;
-      case 'manage-discount': return <ManageDiscount />;
-      case 'manage-analytics': return <ManageAnalytics />;
-      case 'plan-analytics': return <PlanAnalytics />;
-      case 'ai-optimize': return <AIOptimization />;
-      case 'users': return <UserManagement />;
-      case 'settings': return <Settings />;
-      default: return <Dashboard />;
+      case 'dashboard': 
+        return <Dashboard />;
+      case 'subs-manager': 
+        return <SubsManager />;
+      case 'manage-plan': 
+        return <ManagePlan />;
+      case 'manage-discount': 
+        return <ManageDiscount />;
+      case 'manage-analytics': 
+        return <ManageAnalytics />;
+      case 'plan-analytics': 
+        return <PlanAnalytics />;
+      case 'ai-optimize': 
+        return <AIOptimization />;
+      case 'users': 
+        return <UserManagement />;
+      case 'settings': 
+        return <Settings />;
+      default: 
+        return <Dashboard />;
     }
   };
 
@@ -40,7 +50,10 @@ function App() {
         setIsOpen={setSidebarOpen}
       />
       <div className={`main-content ${sidebarOpen ? 'sidebar-open' : ''}`}>
-        <Header setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />
+        <Header 
+          setSidebarOpen={setSidebarOpen} 
+          sidebarOpen={sidebarOpen} 
+        />
         <div className="content-area">
           {renderActiveView()}
         </div>
