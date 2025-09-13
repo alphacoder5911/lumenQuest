@@ -3,12 +3,12 @@ import './Sidebar.css';
 
 const Sidebar = ({ activeView, setActiveView, isOpen, setIsOpen }) => {
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'manage-plan', label: 'Manage Plan', icon: '📋' },
-    { id: 'manage-discount', label: 'Manage Discount', icon: '💰' },
-    { id: 'manage-analytics', label: 'Manage Analytics', icon: '📈' },
-    { id: 'users', label: 'User Management', icon: '👥' },
-    { id: 'settings', label: 'Settings', icon: '⚙️' }
+    { id: 'dashboard', label: 'Dashboard Overview', icon: '📊', description: 'Main analytics dashboard' },
+    { id: 'manage-plan', label: 'Manage Plans & Pricing', icon: '📋', description: 'Add, modify, delete plans' },
+    { id: 'manage-discount', label: 'Add & Manage Discounts', icon: '💰', description: 'Promotional offers & conditions' },
+    { id: 'plan-analytics', label: 'Track Plan Analytics', icon: '📈', description: 'Subscription trends & insights' },
+    { id: 'ai-optimize', label: 'AI-Powered Optimization', icon: '🤖', description: 'Smart recommendations' },
+    { id: 'settings', label: 'Settings', icon: '⚙️', description: 'System configuration' }
   ];
 
   return (
@@ -27,7 +27,7 @@ const Sidebar = ({ activeView, setActiveView, isOpen, setIsOpen }) => {
         <div className="subs-manager-section">
           <div className="subs-manager-card">
             <h3>Subs Manager</h3>
-            <p>Subscription Management Hub</p>
+            <p>Service Provider Dashboard</p>
             <div className="manager-stats">
               <div className="stat-item">
                 <span className="stat-number">1,234</span>
@@ -50,13 +50,27 @@ const Sidebar = ({ activeView, setActiveView, isOpen, setIsOpen }) => {
                 setActiveView(item.id);
                 setIsOpen(false);
               }}
+              title={item.description}
             >
               <span className="nav-icon">{item.icon}</span>
-              <span className="nav-label">{item.label}</span>
+              <div className="nav-content">
+                <span className="nav-label">{item.label}</span>
+                <span className="nav-description">{item.description}</span>
+              </div>
               <span className="nav-arrow">→</span>
             </button>
           ))}
         </nav>
+
+        <div className="sidebar-footer">
+          <div className="ai-indicator">
+            <span className="ai-icon">🤖</span>
+            <div className="ai-status">
+              <span className="ai-label">AI Assistant</span>
+              <span className="ai-state">Active</span>
+            </div>
+          </div>
+        </div>
       </div>
       {isOpen && <div className="sidebar-overlay" onClick={() => setIsOpen(false)} />}
     </>
